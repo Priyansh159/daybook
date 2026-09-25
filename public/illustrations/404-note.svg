@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="800" viewBox="0 0 640 800">
+  <rect width="640" height="800" fill="#f4f0e8"/>
+  <path d="M0 0h640v800H0z" fill="#eef2ff"/>
+  <path d="M0 0h640v800H0z" fill="#ffffff" fill-opacity="0.55"/>
+  <g stroke="#c7d2fe" stroke-width="2">
+    <line x1="80" y1="220" x2="560" y2="220"/>
+    <line x1="80" y1="290" x2="560" y2="290"/>
+    <line x1="80" y1="620" x2="560" y2="620"/>
+    <line x1="80" y1="680" x2="420" y2="680"/>
+  </g>
+  <text x="320" y="150" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="64" font-weight="700" fill="#4338ca">404</text>
+  <text x="320" y="460" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="600" fill="#4f46e5">Page not found</text>
+  <text x="320" y="510" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="20" fill="#6366f1">Hold and drag to crumple this note</text>
+  <path d="M520 0 L640 0 L640 120 Z" fill="#c7d2fe"/>
+  <path d="M520 0 L640 120 L580 120 Z" fill="#e0e7ff"/>
+</svg>
