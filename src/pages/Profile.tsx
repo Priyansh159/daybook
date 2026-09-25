@@ -1,10 +1,11 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { updatePassword } from '@/lib/auth'
 import { useCurrentEmployee } from '@/hooks/useAuth'
 import { useUpdateMyProfile } from '@/hooks/useEmployee'
 import { useToast } from '@/hooks/useToast'
 import { toUserMessage } from '@/lib/errors'
-import { profileSchema, type ProfileInput, type ProfileValues } from '@/lib/validation'
+import { profileSchema, resetPasswordSchema, type ProfileInput, type ProfileValues, type ResetPasswordValues } from '@/lib/validation'
 import { EMPLOYEE_STATUS_META, ROLE_META, initials } from '@/utils/formatters'
 import { formatShortDate } from '@/utils/date'
 import { PageHeader } from '@/components/ui/Navigation'
@@ -12,6 +13,44 @@ import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Field, FormError, Input } from '@/components/ui/Form'
+
+function ChangePasswordCard() {
+  const toast = useToast()
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<ResetPasswordValues>({ resolver: zodResolver(resetPasswordSchema) })
+
+  const onSubmit = handleSubmit(async ({ password }) => {
+    try {
+      await updatePassword(password)
+      reset()
+      toast.success('Password updated')
+    } catch (err) {
+      toast.error(toUserMessage(err))
+    }
+  })
+
+  return (
+    <Card title="Change password" description="Update the password you sign in with">
+      <form onSubmit={onSubmit} className="max-w-sm space-y-4" noValidate>
+        <Field label="New password" htmlFor="password" error={errors.password?.message}>
+          <Input id="password" type="password" autoComplete="new-password" aria-invalid={Boolean(errors.password)} {...register('password')} />
+        </Field>
+        <Field label="Confirm password" htmlFor="confirm" error={errors.confirm?.message}>
+          <Input id="confirm" type="password" autoComplete="new-password" aria-invalid={Boolean(errors.confirm)} {...register('confirm')} />
+        </Field>
+        <div className="flex justify-end">
+          <Button type="submit" loading={isSubmitting}>
+            Update password
+          </Button>
+        </div>
+      </form>
+    </Card>
+  )
+}
 
 export default function Profile() {
   const employee = useCurrentEmployee()
@@ -102,6 +141,10 @@ export default function Profile() {
             </div>
           </form>
         </Card>
+
+        <div className="lg:col-span-2 lg:col-start-2">
+          <ChangePasswordCard />
+        </div>
       </div>
     </div>
   )

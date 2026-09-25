@@ -6,7 +6,7 @@ import type { z } from 'zod'
 import { signInWithPassword } from '@/lib/auth'
 import { toUserMessage } from '@/lib/errors'
 import { loginSchema } from '@/lib/validation'
-import { AuthShell } from '@/components/layout/AuthShell'
+import { AuthShell, authInputClassName } from '@/components/layout/AuthShell'
 import { Button } from '@/components/ui/Button'
 import { Field, FormError, Input } from '@/components/ui/Form'
 
@@ -36,7 +36,7 @@ export default function Login() {
       <form onSubmit={onSubmit} className="space-y-4" noValidate>
         <FormError message={formError} />
         <Field label="Email" htmlFor="email" error={errors.email?.message}>
-          <Input id="email" type="email" autoComplete="email" aria-invalid={Boolean(errors.email)} {...register('email')} />
+          <Input id="email" type="email" autoComplete="email" aria-invalid={Boolean(errors.email)} className={authInputClassName} {...register('email')} />
         </Field>
         <Field label="Password" htmlFor="password" error={errors.password?.message}>
           <Input
@@ -44,6 +44,7 @@ export default function Login() {
             type="password"
             autoComplete="current-password"
             aria-invalid={Boolean(errors.password)}
+            className={authInputClassName}
             {...register('password')}
           />
         </Field>

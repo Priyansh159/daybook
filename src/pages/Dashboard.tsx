@@ -92,7 +92,7 @@ export default function Dashboard() {
                 task={task}
                 onComplete={() => void actions.complete(task)}
                 onEdit={() => actions.openEdit(task)}
-                onDelete={() => void actions.deleteDirect(task)}
+                onDelete={() => actions.removeTask(task)}
               />
             ))}
           </div>

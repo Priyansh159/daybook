@@ -36,8 +36,11 @@ export function Dialog({ open, onClose, title, description, children, footer, si
         if (e.target === ref.current) onClose()
       }}
       className={cn(
-        'w-[calc(100%-2rem)] rounded-xl border border-slate-200 bg-white p-0 shadow-xl backdrop:bg-slate-900/40',
-        'dark:border-slate-700 dark:bg-slate-900 dark:backdrop:bg-slate-950/70',
+        // Browsers give <dialog> its own default `color` (Chrome: CanvasText),
+        // which breaks color inheritance from <body> — set it explicitly so
+        // descendant text that doesn't set its own color isn't left black in dark mode.
+        'w-[calc(100%-2rem)] rounded-xl border border-slate-200 bg-white p-0 text-slate-900 shadow-xl backdrop:bg-slate-900/40',
+        'dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:backdrop:bg-slate-950/70',
         widths[size],
       )}
     >

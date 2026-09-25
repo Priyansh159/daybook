@@ -78,4 +78,10 @@
 .specular-button__label {
   position: relative;
   z-index: 2;
+  /* Without this, an icon (e.g. a loading spinner) placed before the text
+     lays out as plain inline content and sits off the text's baseline
+     instead of centered beside it. */
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
 }

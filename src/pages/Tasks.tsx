@@ -77,7 +77,7 @@ export default function Tasks() {
               task={task}
               onComplete={task.status === 'COMPLETED' ? undefined : () => void actions.complete(task)}
               onEdit={() => actions.openEdit(task)}
-              onDelete={() => void actions.deleteDirect(task)}
+              onDelete={() => actions.removeTask(task)}
             />
           ))}
         </div>

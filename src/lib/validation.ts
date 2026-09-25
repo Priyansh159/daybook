@@ -31,6 +31,7 @@ export const resetPasswordSchema = z
     confirm: z.string(),
   })
   .refine((v) => v.password === v.confirm, { message: 'Passwords do not match', path: ['confirm'] })
+export type ResetPasswordValues = z.infer<typeof resetPasswordSchema>
 
 export const employeeCreateSchema = z.object({
   fullName: z.string().trim().min(1, 'Full name is required').max(120),

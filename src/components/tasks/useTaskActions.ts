@@ -18,7 +18,6 @@ export function useTaskActions(employeeId: string) {
 
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<TaskRow | null>(null)
-  const [deleting, setDeleting] = useState<TaskRow | null>(null)
   const [busyId, setBusyId] = useState<string | null>(null)
   const pendingDeletes = useRef(new Map<string, ReturnType<typeof setTimeout>>())
 
@@ -59,21 +58,10 @@ export function useTaskActions(employeeId: string) {
     }
   }
 
-  const confirmDelete = async () => {
-    if (!deleting) return
-    try {
-      await deleteTask.mutateAsync(deleting.id)
-      toast.success('Task deleted')
-      setDeleting(null)
-    } catch (err) {
-      toast.error(toUserMessage(err))
-    }
-  }
-
-  // For gestures that are already their own confirmation (a full swipe),
-  // skip the hold-to-delete dialog. The task disappears immediately, but the
-  // actual delete is held for a few seconds so "Undo" in the toast can cancel it.
-  const deleteDirect = (task: TaskRow) => {
+  // The swipe/tap gesture is the only confirmation needed — the task
+  // disappears immediately, and the actual delete is held for a few seconds
+  // so "Undo" in the toast can still cancel it.
+  const deleteTaskWithUndo = (task: TaskRow) => {
     const previous = qc.getQueriesData<TaskRow[]>({ queryKey: ['tasks'] })
     qc.setQueriesData<TaskRow[]>({ queryKey: ['tasks'] }, (old) => old?.filter((t) => t.id !== task.id))
 
@@ -106,17 +94,12 @@ export function useTaskActions(employeeId: string) {
   return {
     formOpen,
     editing,
-    deleting,
     busyId,
-    deletePending: deleteTask.isPending,
     openCreate,
     openEdit,
     closeForm,
     submitForm,
     complete,
-    askDelete: setDeleting,
-    cancelDelete: () => setDeleting(null),
-    confirmDelete,
-    deleteDirect,
+    removeTask: deleteTaskWithUndo,
   }
 }

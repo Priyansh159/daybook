@@ -6,7 +6,7 @@ import type { z } from 'zod'
 import { sendPasswordReset } from '@/lib/auth'
 import { toUserMessage } from '@/lib/errors'
 import { forgotPasswordSchema } from '@/lib/validation'
-import { AuthShell } from '@/components/layout/AuthShell'
+import { AuthShell, authInputClassName } from '@/components/layout/AuthShell'
 import { Button } from '@/components/ui/Button'
 import { Field, FormError, Input } from '@/components/ui/Form'
 
@@ -46,7 +46,7 @@ export default function ForgotPassword() {
         <form onSubmit={onSubmit} className="space-y-4" noValidate>
           <FormError message={formError} />
           <Field label="Email" htmlFor="email" error={errors.email?.message}>
-            <Input id="email" type="email" autoComplete="email" aria-invalid={Boolean(errors.email)} {...register('email')} />
+            <Input id="email" type="email" autoComplete="email" aria-invalid={Boolean(errors.email)} className={authInputClassName} {...register('email')} />
           </Field>
           <Button type="submit" className="w-full" loading={isSubmitting}>
             Send reset link

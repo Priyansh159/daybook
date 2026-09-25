@@ -1,22 +1,34 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { DayEntry } from '@/hooks/useMonthData'
 import { useMonthData } from '@/hooks/useMonthData'
+import { useTasks } from '@/hooks/useTasks'
+import type { TaskRow } from '@/types/database'
 import { currentYearMonth, formatLongDate, monthLabel, shiftMonth, todayIso, type YearMonth } from '@/utils/date'
-import { ATTENDANCE_META, LEAVE_TYPE_LABEL } from '@/utils/formatters'
+import { ATTENDANCE_META, LEAVE_TYPE_LABEL, TASK_PRIORITY_META, TASK_STATUS_META } from '@/utils/formatters'
+import { taskFallsOnDate } from '@/utils/tasks'
 import { cn } from '@/utils/cn'
 import { MonthPicker } from '@/components/ui/Navigation'
 import { Dialog } from '@/components/ui/Dialog'
 import { Badge } from '@/components/ui/Badge'
 import { ErrorState, Skeleton } from '@/components/ui/Feedback'
+import { DailyStatusPicker } from '@/components/dashboard/DailyStatusPicker'
+import { TaskDetailDialog } from '@/components/tasks/TaskDetailDialog'
 
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 export function MonthCalendar({ employeeId, month, onMonthChange }: { employeeId: string; month: YearMonth; onMonthChange: (ym: YearMonth) => void }) {
   const { days, isLoading, error, refetch } = useMonthData(employeeId, month)
+  const tasks = useTasks({ employeeId })
   const [selected, setSelected] = useState<DayEntry | null>(null)
+  const [viewingTask, setViewingTask] = useState<TaskRow | null>(null)
   const today = todayIso()
   const now = currentYearMonth()
   const isCurrentOrFutureMonth = month.year > now.year || (month.year === now.year && month.month >= now.month)
+
+  const tasksOnSelected = useMemo(
+    () => (selected ? (tasks.data ?? []).filter((t) => taskFallsOnDate(t, selected.date)) : []),
+    [tasks.data, selected],
+  )
 
   const leadingBlanks = new Date(month.year, month.month - 1, 1).getDay()
 
@@ -97,9 +109,37 @@ export function MonthCalendar({ employeeId, month, onMonthChange }: { employeeId
                 <span className="text-slate-500 dark:text-slate-400">Note:</span> {selected.attendance?.note || selected.leave?.reason || selected.wfh?.reason}
               </p>
             )}
+
+            {tasksOnSelected.length > 0 && (
+              <div className="space-y-1.5 border-t border-slate-100 pt-3 dark:border-slate-800">
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Tasks</p>
+                {tasksOnSelected.map((task) => (
+                  <button
+                    key={task.id}
+                    type="button"
+                    onClick={() => setViewingTask(task)}
+                    className="flex w-full items-center justify-between gap-2 rounded-lg border border-slate-200 px-3 py-2 text-left hover:border-brand-400 dark:border-slate-800 dark:hover:border-brand-500"
+                  >
+                    <span className={cn('truncate font-medium', task.status === 'COMPLETED' && 'text-slate-400 line-through dark:text-slate-500')}>
+                      {task.title}
+                    </span>
+                    <span className="flex shrink-0 gap-1.5">
+                      <Badge tone={TASK_STATUS_META[task.status].tone}>{TASK_STATUS_META[task.status].label}</Badge>
+                      <Badge tone={TASK_PRIORITY_META[task.priority].tone}>{TASK_PRIORITY_META[task.priority].label}</Badge>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <div className="space-y-2 border-t border-slate-100 pt-3 dark:border-slate-800">
+              <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Update status</p>
+              <DailyStatusPicker employeeId={employeeId} date={selected.date} compact />
+            </div>
           </div>
         )}
       </Dialog>
+      <TaskDetailDialog task={viewingTask} onClose={() => setViewingTask(null)} />
     </div>
   )
 }

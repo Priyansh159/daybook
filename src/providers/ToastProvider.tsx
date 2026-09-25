@@ -1,13 +1,34 @@
 import { useCallback, useMemo, useRef, useState, type ReactNode } from 'react'
-import { cn } from '@/utils/cn'
 import { ToastContext, type ToastAction, type ToastApi, type ToastOptions, type ToastTone } from '@/hooks/useToast'
+import SwipeToast from '@/components/micro/SwipeToast'
 
-type Toast = { id: number; message: string; tone: ToastTone; action?: ToastAction }
+type Toast = { id: number; message: string; tone: ToastTone; action?: ToastAction; duration: number }
 
-const toneClass: Record<ToastTone, string> = {
-  success: 'border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900/50 dark:bg-emerald-950/80 dark:text-emerald-300',
-  error: 'border-red-200 bg-red-50 text-red-800 dark:border-red-900/50 dark:bg-red-950/80 dark:text-red-300',
-  info: 'border-slate-200 bg-white text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200',
+const TONE_FUSE: Record<ToastTone, string> = {
+  success: '#22c55e',
+  error: '#f87171',
+  info: '#818cf8',
+}
+
+const TONE_ICON: Record<ToastTone, ReactNode> = {
+  success: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M8 12.5l2.5 2.5L16 9" />
+    </svg>
+  ),
+  error: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="#f87171" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 8v5M12 16h.01" />
+    </svg>
+  ),
+  info: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="#818cf8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 11v5M12 8h.01" />
+    </svg>
+  ),
 }
 
 export function ToastProvider({ children }: { children: ReactNode }) {
@@ -18,14 +39,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     setToasts((list) => list.filter((t) => t.id !== id))
   }, [])
 
-  const show = useCallback(
-    (message: string, tone: ToastTone = 'info', options?: ToastOptions) => {
-      const id = nextId.current++
-      setToasts((list) => [...list.slice(-3), { id, message, tone, action: options?.action }])
-      window.setTimeout(() => dismiss(id), options?.duration ?? 4000)
-    },
-    [dismiss],
-  )
+  const show = useCallback((message: string, tone: ToastTone = 'info', options?: ToastOptions) => {
+    const id = nextId.current++
+    setToasts((list) => [...list.slice(-3), { id, message, tone, action: options?.action, duration: options?.duration ?? 4000 }])
+  }, [])
 
   const api = useMemo<ToastApi>(
     () => ({
@@ -40,35 +57,26 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <ToastContext.Provider value={api}>
       {children}
       <div
-        className="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex flex-col items-center gap-2 px-4 sm:inset-x-auto sm:right-4 sm:items-end"
+        className="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex flex-col items-center px-4 sm:inset-x-auto sm:right-4 sm:items-end"
         aria-live="polite"
       >
         {toasts.map((t) => (
-          <div
+          <SwipeToast
             key={t.id}
-            role={t.tone === 'error' ? 'alert' : 'status'}
-            className={cn(
-              'animate-toast-in pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-lg border px-4 py-3 text-sm shadow-lg',
-              toneClass[t.tone],
-            )}
-          >
-            <span className="flex-1">{t.message}</span>
-            {t.action && (
-              <button
-                type="button"
-                onClick={() => {
-                  t.action?.onClick()
-                  dismiss(t.id)
-                }}
-                className="font-medium underline underline-offset-2 hover:no-underline"
-              >
-                {t.action.label}
-              </button>
-            )}
-            <button type="button" onClick={() => dismiss(t.id)} className="opacity-60 hover:opacity-100" aria-label="Dismiss">
-              ×
-            </button>
-          </div>
+            inline
+            className="pointer-events-auto"
+            title={t.message}
+            icon={TONE_ICON[t.tone]}
+            actionLabel={t.action?.label}
+            onAction={t.action?.onClick}
+            duration={t.duration}
+            background="#1e293b"
+            color="#f1f5f9"
+            fuseColor={TONE_FUSE[t.tone]}
+            width={356}
+            radius={12}
+            onClose={() => dismiss(t.id)}
+          />
         ))}
       </div>
     </ToastContext.Provider>

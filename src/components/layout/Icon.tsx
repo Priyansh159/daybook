@@ -12,6 +12,7 @@ const paths = {
   menu: 'M4 6h16M4 12h16M4 18h16',
   close: 'M6 6l12 12M18 6L6 18',
   logout: 'M15 17l5-5-5-5M20 12H9m4 8H5a1 1 0 01-1-1V5a1 1 0 011-1h8',
+  chevronDown: 'M6 9l6 6 6-6',
 } as const
 
 export type IconName = keyof typeof paths

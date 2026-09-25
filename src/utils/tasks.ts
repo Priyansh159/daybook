@@ -71,3 +71,12 @@ export function taskDateLabel(startDate: string | null, dueDate: string | null, 
   if (startDate) return `From: ${formatShortDate(startDate)}`
   return null
 }
+
+// Whether a task's date range (start_date..due_date, or whichever one is
+// set) covers a given calendar day.
+export function taskFallsOnDate<T extends Pick<TaskRow, 'start_date' | 'due_date'>>(task: T, date: string): boolean {
+  const start = task.start_date ?? task.due_date
+  const end = task.due_date ?? task.start_date
+  if (!start || !end) return false
+  return start <= date && date <= end
+}
