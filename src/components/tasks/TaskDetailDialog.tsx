@@ -1,10 +1,39 @@
+import { useState } from 'react'
 import type { TaskRow } from '@/types/database'
 import { formatShortDate } from '@/utils/date'
 import { TASK_PRIORITY_META, TASK_STATUS_META } from '@/utils/formatters'
+import { toUserMessage } from '@/lib/errors'
+import { useToast } from '@/hooks/useToast'
+import { useUpdateTask } from '@/hooks/useTasks'
 import { Dialog } from '@/components/ui/Dialog'
 import { Badge } from '@/components/ui/Badge'
+import { RichTextView } from '@/components/tasks/RichText'
 
 export function TaskDetailDialog({ task, onClose }: { task: TaskRow | null; onClose: () => void }) {
+  const toast = useToast()
+  const updateTask = useUpdateTask()
+  // Shows the just-toggled checklist state immediately instead of waiting on
+  // the refetch that follows the mutation; cleared once a different task is viewed.
+  const [pendingDescription, setPendingDescription] = useState<string | null>(null)
+  const [lastTaskId, setLastTaskId] = useState(task?.id ?? null)
+  if ((task?.id ?? null) !== lastTaskId) {
+    setLastTaskId(task?.id ?? null)
+    setPendingDescription(null)
+  }
+
+  const handleToggleItem = (id: string, nextHtml: string) => {
+    setPendingDescription(nextHtml)
+    updateTask.mutate(
+      { id, values: { description: nextHtml } },
+      {
+        onError: (err) => {
+          setPendingDescription(null)
+          toast.error(toUserMessage(err))
+        },
+      },
+    )
+  }
+
   return (
     <Dialog open={Boolean(task)} onClose={onClose} title={task?.title ?? ''} size="md">
       {task && (
@@ -16,7 +45,10 @@ export function TaskDetailDialog({ task, onClose }: { task: TaskRow | null; onCl
           </div>
 
           {task.description && (
-            <p className="whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300">{task.description}</p>
+            <RichTextView
+              html={pendingDescription ?? task.description}
+              onToggleItem={(nextHtml) => handleToggleItem(task.id, nextHtml)}
+            />
           )}
 
           {(task.start_date || task.due_date) && (

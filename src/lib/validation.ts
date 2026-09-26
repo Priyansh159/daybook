@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { isRichTextEmpty, sanitizeTaskHtml } from '@/utils/richText'
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Enter a valid date')
 const optionalText = (max: number) =>
@@ -78,10 +79,19 @@ const optionalIsoDate = z
   .transform((v) => (v === '' ? null : v))
   .nullable()
 
+// Description is rich text (HTML from the task editor), so it isn't trimmed
+// like plain text — whitespace inside formatting is meaningful — and the
+// length cap is generous to leave room for markup overhead.
+const richTextDescription = z
+  .string()
+  .max(20000, 'Description is too long')
+  .transform((v) => (isRichTextEmpty(v) ? null : sanitizeTaskHtml(v)))
+  .nullable()
+
 export const taskSchema = z
   .object({
     title: z.string().trim().min(1, 'Title is required').max(200),
-    description: optionalText(2000),
+    description: richTextDescription,
     project: optionalText(120),
     priority: z.enum(['LOW', 'MEDIUM', 'HIGH']),
     status: z.enum(['TODO', 'IN_PROGRESS', 'BLOCKED', 'COMPLETED']),

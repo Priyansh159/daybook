@@ -3,6 +3,7 @@ import type { TaskRow } from '@/types/database'
 import { todayIso } from '@/utils/date'
 import { TASK_PRIORITY_META, TASK_STATUS_META } from '@/utils/formatters'
 import { taskDateLabel } from '@/utils/tasks'
+import { richTextToPlainText } from '@/utils/richText'
 import { cn } from '@/utils/cn'
 import { useTheme } from '@/hooks/useTheme'
 import { Badge } from '@/components/ui/Badge'
@@ -49,7 +50,11 @@ export function TaskCard({ task, ownerName, busy, onComplete, onEdit, onDelete }
         <Badge tone={TASK_PRIORITY_META[task.priority].tone}>{TASK_PRIORITY_META[task.priority].label}</Badge>
       </div>
       <button type="button" onClick={() => setViewing(true)} className="mt-1 block w-full text-left" aria-haspopup="dialog">
-        {task.description && <p className="line-clamp-2 text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300">{task.description}</p>}
+        {task.description && (
+          <p className="line-clamp-2 text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300">
+            {richTextToPlainText(task.description)}
+          </p>
+        )}
         <span className="text-xs font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300">View details</span>
       </button>
       <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">

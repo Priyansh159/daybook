@@ -102,6 +102,60 @@ html.dark *::-webkit-scrollbar-thumb:hover {
   background-color: #475569;
 }
 
+/* Task description rich text — shared by the editable field (TaskFormDialog)
+   and the read-only view (TaskDetailDialog) so saved content looks the same
+   in both places. */
+.rte-content {
+  color: theme('colors.slate.900');
+}
+html.dark .rte-content {
+  color: theme('colors.slate.100');
+}
+.rte-content p {
+  margin: 0.25em 0;
+}
+.rte-content ul,
+.rte-content ol {
+  margin: 0.25em 0;
+  padding-left: 1.5rem;
+}
+.rte-content ul {
+  list-style: disc;
+}
+.rte-content ol {
+  list-style: decimal;
+}
+.rte-content ul[data-type='taskList'] {
+  list-style: none;
+  padding-left: 0;
+}
+.rte-content ul[data-type='taskList'] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+.rte-content ul[data-type='taskList'] li > label {
+  flex: 0 0 auto;
+  margin-top: 0.2em;
+  user-select: none;
+}
+.rte-content ul[data-type='taskList'] li > div {
+  flex: 1 1 auto;
+}
+.rte-content ul[data-type='taskList'] li[data-checked='true'] > div {
+  color: theme('colors.slate.400');
+  text-decoration: line-through;
+}
+html.dark .rte-content ul[data-type='taskList'] li[data-checked='true'] > div {
+  color: theme('colors.slate.500');
+}
+.rte-content--view {
+  caret-color: transparent;
+}
+.rte-content--view ul[data-type='taskList'] li > label input[type='checkbox'] {
+  cursor: pointer;
+}
+
 @media (prefers-reduced-motion: reduce) {
   dialog,
   dialog::backdrop {

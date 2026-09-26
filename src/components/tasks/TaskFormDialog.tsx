@@ -1,12 +1,13 @@
 import { useEffect } from 'react'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { taskSchema, type TaskInput, type TaskValues } from '@/lib/validation'
 import type { TaskRow } from '@/types/database'
 import { TASK_PRIORITY_META, TASK_STATUS_META } from '@/utils/formatters'
 import { Dialog } from '@/components/ui/Dialog'
 import { Button } from '@/components/ui/Button'
-import { Field, Input, Select, Textarea } from '@/components/ui/Form'
+import { Field, Input, Select } from '@/components/ui/Form'
+import { RichTextEditor } from '@/components/tasks/RichText'
 
 type Props = {
   open: boolean
@@ -28,6 +29,7 @@ const emptyValues: TaskInput = {
 export function TaskFormDialog({ open, task, onClose, onSubmit }: Props) {
   const {
     register,
+    control,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
@@ -79,7 +81,18 @@ export function TaskFormDialog({ open, task, onClose, onSubmit }: Props) {
           <Input id="task-project" placeholder="e.g. Smriti 3.0" aria-invalid={Boolean(errors.project)} {...register('project')} />
         </Field>
         <Field label="Description" htmlFor="task-description" error={errors.description?.message}>
-          <Textarea id="task-description" rows={7} className="resize-y" {...register('description')} />
+          <Controller
+            name="description"
+            control={control}
+            render={({ field }) => (
+              <RichTextEditor
+                id="task-description"
+                value={field.value ?? ''}
+                onChange={field.onChange}
+                invalid={Boolean(errors.description)}
+              />
+            )}
+          />
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Priority" htmlFor="task-priority">
