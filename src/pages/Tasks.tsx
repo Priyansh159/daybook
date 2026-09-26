@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/Button'
 import { ThemedSelect } from '@/components/ui/ThemedSelect'
 import { EmptyState, ErrorState, SkeletonRows } from '@/components/ui/Feedback'
 
-type StatusFilter = 'ALL' | TaskStatus
+type StatusFilter = 'ALL' | 'PENDING' | TaskStatus
 type PriorityFilter = 'ALL' | TaskPriority
 
 export default function Tasks() {
@@ -24,7 +24,11 @@ export default function Tasks() {
   const [sort, setSort] = useState<TaskSortKey>('due')
 
   const filtered = useMemo(() => {
-    const rows = (tasks.data ?? []).filter((t) => (status === 'ALL' || t.status === status) && (priority === 'ALL' || t.priority === priority))
+    const rows = (tasks.data ?? []).filter((t) => {
+      if (status === 'PENDING' ? t.status === 'COMPLETED' : status !== 'ALL' && t.status !== status) return false
+      if (priority !== 'ALL' && t.priority !== priority) return false
+      return true
+    })
     return sortTasks(rows, sort)
   }, [tasks.data, status, priority, sort])
 
@@ -41,7 +45,11 @@ export default function Tasks() {
           className="w-full sm:w-40"
           value={status}
           onChange={(v) => setStatus(v as StatusFilter)}
-          options={[{ value: 'ALL', label: 'All statuses' }, ...Object.entries(TASK_STATUS_META).map(([value, meta]) => ({ value, label: meta.label }))]}
+          options={[
+            { value: 'ALL', label: 'All statuses' },
+            { value: 'PENDING', label: 'Pending' },
+            ...Object.entries(TASK_STATUS_META).map(([value, meta]) => ({ value, label: meta.label })),
+          ]}
           ariaLabel="Filter by status"
         />
         <ThemedSelect

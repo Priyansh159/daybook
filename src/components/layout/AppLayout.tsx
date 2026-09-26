@@ -167,7 +167,7 @@ function Brand() {
   return (
     <div className="flex h-16 items-center gap-2 border-b border-slate-200 px-5 dark:border-slate-800">
       <Logo className="h-8 w-8 rounded-lg" />
-      <span className="text-base font-semibold text-slate-900 dark:text-slate-100">Daybook</span>
+      <span className="text-base font-semibold text-slate-900 dark:text-slate-100">Task Master</span>
     </div>
   )
 }

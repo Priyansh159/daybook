@@ -28,6 +28,24 @@ describe('taskStats', () => {
     const tasks = [task({ status: 'TODO' }), task({ status: 'IN_PROGRESS' }), task({ status: 'COMPLETED' }), task({ status: 'COMPLETED' })]
     expect(taskStats(tasks)).toMatchObject({ total: 4, pending: 2, completed: 2 })
   })
+
+  it('counts overdue, due-today, and high-priority-open tasks, ignoring completed ones', () => {
+    const tasks = [
+      task({ status: 'TODO', due_date: '2020-01-01', priority: 'HIGH' }), // overdue + high priority
+      task({ status: 'IN_PROGRESS', due_date: '2099-01-01', priority: 'HIGH' }), // high priority, not overdue
+      task({ status: 'COMPLETED', due_date: '2020-01-01', priority: 'HIGH' }), // completed — excluded from all three
+      task({ status: 'TODO', due_date: null, priority: 'LOW' }),
+    ]
+    const stats = taskStats(tasks, () => '2026-06-15')
+    expect(stats.overdue).toBe(1)
+    expect(stats.highPriorityOpen).toBe(2)
+    expect(stats.dueToday).toBe(0)
+  })
+
+  it('counts a task due exactly today', () => {
+    const stats = taskStats([task({ status: 'TODO', due_date: '2026-06-15' })], () => '2026-06-15')
+    expect(stats.dueToday).toBe(1)
+  })
 })
 
 describe('sortOpenTasks', () => {

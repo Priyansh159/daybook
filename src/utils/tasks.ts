@@ -1,11 +1,40 @@
 import type { TaskPriority, TaskRow, TaskStatus } from '@/types/database'
-import { formatShortDate, relativeDueLabel } from '@/utils/date'
+import { formatShortDate, relativeDueLabel, todayIso } from '@/utils/date'
 
-export type TaskStats = { total: number; pending: number; completed: number } & Record<TaskStatus, number>
+export type TaskStats = {
+  total: number
+  pending: number
+  completed: number
+  overdue: number
+  dueToday: number
+  highPriorityOpen: number
+} & Record<TaskStatus, number>
 
-export function taskStats(tasks: ReadonlyArray<Pick<TaskRow, 'status'>>): TaskStats {
-  const stats: TaskStats = { total: tasks.length, pending: 0, completed: 0, TODO: 0, IN_PROGRESS: 0, BLOCKED: 0, COMPLETED: 0 }
-  for (const t of tasks) stats[t.status] += 1
+export function taskStats(
+  tasks: ReadonlyArray<Pick<TaskRow, 'status' | 'due_date' | 'priority'>>,
+  getToday: () => string = todayIso,
+): TaskStats {
+  const today = getToday()
+  const stats: TaskStats = {
+    total: tasks.length,
+    pending: 0,
+    completed: 0,
+    overdue: 0,
+    dueToday: 0,
+    highPriorityOpen: 0,
+    TODO: 0,
+    IN_PROGRESS: 0,
+    BLOCKED: 0,
+    COMPLETED: 0,
+  }
+  for (const t of tasks) {
+    stats[t.status] += 1
+    if (t.status !== 'COMPLETED') {
+      if (t.due_date && t.due_date < today) stats.overdue += 1
+      else if (t.due_date === today) stats.dueToday += 1
+      if (t.priority === 'HIGH') stats.highPriorityOpen += 1
+    }
+  }
   stats.completed = stats.COMPLETED
   stats.pending = stats.total - stats.completed
   return stats

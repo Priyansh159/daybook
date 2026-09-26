@@ -8,7 +8,8 @@ import { formatDays } from '@/utils/formatters'
 import { sortOpenTasks, taskStats } from '@/utils/tasks'
 import { TodayStatus } from '@/components/dashboard/TodayStatus'
 import { StatusStrip } from '@/components/dashboard/StatusStrip'
-import { BalanceCard, StatCard } from '@/components/dashboard/StatCard'
+import { BalanceCard } from '@/components/dashboard/StatCard'
+import { TaskOverviewCard } from '@/components/dashboard/TaskOverviewCard'
 import { TaskRow } from '@/components/tasks/TaskRow'
 import { TaskDialogs } from '@/components/tasks/TaskDialogs'
 import { useTaskActions } from '@/components/tasks/useTaskActions'
@@ -39,19 +40,13 @@ export default function Dashboard() {
 
       <TodayStatus employeeId={employee.id} />
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2">
         <BalanceCard title={`Leave · ${monthLabel(ym)}`} balance={leave.data} loading={leave.isPending} format={formatDays} />
         <BalanceCard title={`WFH · ${monthLabel(ym)}`} balance={wfh.data} loading={wfh.isPending} format={formatDays} />
-        <div className="grid grid-cols-3 gap-2 md:grid-cols-1 md:gap-0 md:rounded-xl md:border md:border-slate-200 md:bg-white md:p-4 md:shadow-sm dark:md:border-slate-800 dark:md:bg-slate-900">
-          <p className="col-span-3 hidden text-sm font-semibold text-slate-900 dark:text-slate-100 md:block">Tasks</p>
-          <div className="contents md:mt-3 md:grid md:grid-cols-3 md:gap-2 md:text-center">
-            <StatCard label="Total" value={stats.total} loading={tasks.isPending} />
-            <StatCard label="Pending" value={stats.pending} accent="amber" loading={tasks.isPending} />
-            <StatCard label="Completed" value={stats.completed} accent="green" loading={tasks.isPending} />
-          </div>
-        </div>
       </div>
       {(leave.error || wfh.error) && <ErrorState error={leave.error ?? wfh.error} onRetry={() => { void leave.refetch(); void wfh.refetch() }} />}
+
+      <TaskOverviewCard stats={stats} tasks={tasks.data ?? []} loading={tasks.isPending} />
 
       <Card>
         <StatusStrip employeeId={employee.id} />

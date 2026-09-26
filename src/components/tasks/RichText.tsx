@@ -6,7 +6,7 @@ import Color from '@tiptap/extension-color'
 import TaskList from '@tiptap/extension-task-list'
 import TaskItem from '@tiptap/extension-task-item'
 import { cn } from '@/utils/cn'
-import { sanitizeTaskHtml } from '@/utils/richText'
+import { ensureTaskHtml, sanitizeTaskHtml } from '@/utils/richText'
 
 // Shared node/mark set for both the editable form field and the read-only
 // detail view — must match so content saved by one renders the same in the other.
@@ -115,7 +115,7 @@ type EditorProps = {
 export function RichTextEditor({ id, value, onChange, invalid }: EditorProps) {
   const editor = useEditor({
     extensions: richTextExtensions(),
-    content: value || '',
+    content: ensureTaskHtml(value),
     editorProps: {
       attributes: {
         ...(id ? { id } : {}),
@@ -128,8 +128,9 @@ export function RichTextEditor({ id, value, onChange, invalid }: EditorProps) {
 
   useEffect(() => {
     if (!editor) return
-    if (editor.getHTML() === value) return
-    editor.commands.setContent(value || '', { emitUpdate: false })
+    const nextHtml = ensureTaskHtml(value)
+    if (editor.getHTML() === nextHtml) return
+    editor.commands.setContent(nextHtml, { emitUpdate: false })
     // Only resync when the value changes from outside this editor instance
     // (e.g. the form resetting to a different task) — onUpdate above keeps
     // `value` and the editor's own HTML in lockstep while typing.
@@ -170,7 +171,7 @@ export function RichTextView({
   const editor = useEditor({
     extensions: richTextExtensions(),
     editable: interactive,
-    content: html,
+    content: ensureTaskHtml(html),
     editorProps: {
       attributes: { class: 'rte-content rte-content--view text-sm' },
       handleKeyDown: (_view, event) => (event.target as HTMLElement | null)?.tagName !== 'INPUT',
@@ -183,8 +184,9 @@ export function RichTextView({
 
   useEffect(() => {
     if (!editor) return
-    if (editor.getHTML() === html) return
-    editor.commands.setContent(html, { emitUpdate: false })
+    const nextHtml = ensureTaskHtml(html)
+    if (editor.getHTML() === nextHtml) return
+    editor.commands.setContent(nextHtml, { emitUpdate: false })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [html, editor])
 

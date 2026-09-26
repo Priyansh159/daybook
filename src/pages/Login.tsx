@@ -32,7 +32,7 @@ export default function Login() {
   })
 
   return (
-    <AuthShell title="Sign in to Daybook" subtitle="Use the email and password from your administrator">
+    <AuthShell title="Sign in to Task Master" subtitle="Use the email and password from your administrator">
       <form onSubmit={onSubmit} className="space-y-4" noValidate>
         <FormError message={formError} />
         <Field label="Email" htmlFor="email" error={errors.email?.message}>

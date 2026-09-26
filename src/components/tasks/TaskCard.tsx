@@ -3,11 +3,12 @@ import type { TaskRow } from '@/types/database'
 import { todayIso } from '@/utils/date'
 import { TASK_PRIORITY_META, TASK_STATUS_META } from '@/utils/formatters'
 import { taskDateLabel } from '@/utils/tasks'
-import { richTextToPlainText } from '@/utils/richText'
+import { getChecklistProgress, richTextToPlainText } from '@/utils/richText'
 import { cn } from '@/utils/cn'
 import { useTheme } from '@/hooks/useTheme'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
+import { ProgressBar } from '@/components/ui/ProgressBar'
 import { TaskDetailDialog } from '@/components/tasks/TaskDetailDialog'
 import SpringCheck from '@/components/micro/SpringCheck'
 
@@ -26,6 +27,7 @@ export function TaskCard({ task, ownerName, busy, onComplete, onEdit, onDelete }
   const done = task.status === 'COMPLETED'
   const overdue = !done && task.due_date !== null && task.due_date < todayIso()
   const dark = resolved === 'dark'
+  const progress = getChecklistProgress(task.description)
 
   return (
     <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -57,6 +59,9 @@ export function TaskCard({ task, ownerName, busy, onComplete, onEdit, onDelete }
         )}
         <span className="text-xs font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300">View details</span>
       </button>
+      {progress && (
+        <ProgressBar value={progress.done} max={progress.total} label={`${progress.done}/${progress.total} subtasks`} className="mt-2" />
+      )}
       <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
         <Badge tone={TASK_STATUS_META[task.status].tone}>{TASK_STATUS_META[task.status].label}</Badge>
         {task.project && <Badge tone="indigo">{task.project}</Badge>}

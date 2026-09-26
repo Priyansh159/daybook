@@ -1,4 +1,4 @@
-# Daybook
+# Task Master
 
 A personal HRMS: employee profiles, monthly leave and WFH balances, daily
 attendance status, and per-employee task management, with an admin console

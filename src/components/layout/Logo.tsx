@@ -9,7 +9,7 @@ export function Logo({ className }: { className?: string }) {
   const gradientId = useId()
 
   return (
-    <svg viewBox="0 0 48 48" className={cn('shrink-0', className)} role="img" aria-label="Daybook">
+    <svg viewBox="0 0 48 48" className={cn('shrink-0', className)} role="img" aria-label="Task Master">
       <defs>
         <linearGradient id={gradientId} x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
           <stop offset="0" stopColor="#6366f1" />

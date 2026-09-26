@@ -3,9 +3,11 @@ import type { TaskRow as TaskRowData } from '@/types/database'
 import { todayIso } from '@/utils/date'
 import { TASK_PRIORITY_META, TASK_STATUS_META } from '@/utils/formatters'
 import { taskDateLabel } from '@/utils/tasks'
+import { getChecklistProgress } from '@/utils/richText'
 import { cn } from '@/utils/cn'
 import { useTheme } from '@/hooks/useTheme'
 import { Badge } from '@/components/ui/Badge'
+import { ProgressBar } from '@/components/ui/ProgressBar'
 import { TaskDetailDialog } from '@/components/tasks/TaskDetailDialog'
 import SwipeRow, { type SwipeAction } from '@/components/micro/SwipeRow'
 
@@ -26,6 +28,7 @@ export function TaskRow({ task, ownerName, onComplete, onEdit, onDelete }: Props
   const done = task.status === 'COMPLETED'
   const overdue = !done && task.due_date !== null && task.due_date < todayIso()
   const dark = resolved === 'dark'
+  const progress = getChecklistProgress(task.description)
 
   const actions: SwipeAction[] = [
     { id: 'delete', label: 'Delete', dismiss: true },
@@ -42,7 +45,7 @@ export function TaskRow({ task, ownerName, onComplete, onEdit, onDelete }: Props
         drawerColor={dark ? '#1e293b' : '#e2e8f0'}
         textColor={dark ? '#f1f5f9' : '#0f172a'}
         actionColor="#dc2626"
-        height={76}
+        height={progress ? 92 : 76}
         radius={12}
         onAction={(action) => {
           if (action.id === 'complete') onComplete?.()
@@ -66,6 +69,7 @@ export function TaskRow({ task, ownerName, onComplete, onEdit, onDelete }: Props
               )}
               {ownerName && <span>· {ownerName}</span>}
             </div>
+            {progress && <ProgressBar value={progress.done} max={progress.total} className="w-full max-w-[200px]" />}
           </div>
           <Badge tone={TASK_PRIORITY_META[task.priority].tone} className="shrink-0">
             {TASK_PRIORITY_META[task.priority].label}

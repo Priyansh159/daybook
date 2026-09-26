@@ -2,11 +2,13 @@ import { useState } from 'react'
 import type { TaskRow } from '@/types/database'
 import { formatShortDate } from '@/utils/date'
 import { TASK_PRIORITY_META, TASK_STATUS_META } from '@/utils/formatters'
+import { getChecklistProgress } from '@/utils/richText'
 import { toUserMessage } from '@/lib/errors'
 import { useToast } from '@/hooks/useToast'
 import { useUpdateTask } from '@/hooks/useTasks'
 import { Dialog } from '@/components/ui/Dialog'
 import { Badge } from '@/components/ui/Badge'
+import { ProgressBar } from '@/components/ui/ProgressBar'
 import { RichTextView } from '@/components/tasks/RichText'
 
 export function TaskDetailDialog({ task, onClose }: { task: TaskRow | null; onClose: () => void }) {
@@ -34,6 +36,9 @@ export function TaskDetailDialog({ task, onClose }: { task: TaskRow | null; onCl
     )
   }
 
+  const currentDescription = pendingDescription ?? task?.description ?? null
+  const progress = getChecklistProgress(currentDescription)
+
   return (
     <Dialog open={Boolean(task)} onClose={onClose} title={task?.title ?? ''} size="md">
       {task && (
@@ -44,11 +49,10 @@ export function TaskDetailDialog({ task, onClose }: { task: TaskRow | null; onCl
             {task.project && <Badge tone="indigo">{task.project}</Badge>}
           </div>
 
-          {task.description && (
-            <RichTextView
-              html={pendingDescription ?? task.description}
-              onToggleItem={(nextHtml) => handleToggleItem(task.id, nextHtml)}
-            />
+          {progress && <ProgressBar value={progress.done} max={progress.total} label={`${progress.done}/${progress.total} subtasks`} />}
+
+          {currentDescription && (
+            <RichTextView html={currentDescription} onToggleItem={(nextHtml) => handleToggleItem(task.id, nextHtml)} />
           )}
 
           {(task.start_date || task.due_date) && (
